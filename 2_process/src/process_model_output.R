@@ -12,13 +12,28 @@ process_and_combine_model_output <- function(target_name, task_ind) {
   combined_df <- purrr::map(files, function(file){ 
 
     # read and manipulate file, return data.frame
-    file_date <- as.Date(gsub(".*([0-9]{8}).csv", '\\1', file), format="%Y%m%d")
-    readr::read_csv(file) %>% 
-      select(hru_id_nat, value) %>%
-      mutate(date = file_date) %>% 
+    readr::read_csv(file, col_types = cols()) %>% 
+      dplyr::select(hru_id_nat, value) %>%
+      mutate(date_str = paste0("date_", gsub(".*([0-9]{8}).csv", '\\1', file))) %>% 
       filter(value != "Undefined")
+    
   }) %>% 
-    purrr::reduce(dplyr::bind_rows)
+    purrr::reduce(dplyr::bind_rows) 
   
   saveRDS(combined_df, target_name)
+}
+
+join_spatial_and_data <- function(target_name, spatial_sf_fn, model_data_fn) {
+  
+  spatial_sf <- readRDS(spatial_sf_fn)
+  model_data <- readRDS(model_data_fn)
+  
+  # there are some HRUs in spatial_sf that aren't in the model_data
+  joined_data <- left_join(spatial_sf, model_data, by = "hru_id_nat")
+  
+  data_for_plotting <- joined_data %>% 
+    # filter out NAs just in case (first time, there were actually none ...)
+    filter(!is.na(value))
+    
+  saveRDS(data_for_plotting, target_name)
 }

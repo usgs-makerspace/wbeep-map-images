@@ -19,6 +19,7 @@ targets:
       - 2_process/out/hru_sf.rds
       - 2_process/out/hru_conus_sf.rds
       - 2_process/out/wbeep_storage_data_combined.rds
+      - 2_process/out/wbeep_storage_data_sf.rds
 
   ##### Process spatial data ##### 
   
@@ -29,7 +30,7 @@ targets:
       proj_start = I(4326),
       proj_target = proj)
 
-  # Crop hru spatial data to just CONUS
+  # Crop hru spatial data to just CONUS (takes ~30 minutes)
   2_process/out/hru_conus_sf.rds:
     command: crop_hru_to_conus(
       target_name = target_name,
@@ -40,3 +41,9 @@ targets:
 
   2_process/out/wbeep_storage_data_combined.rds:
     command: process_and_combine_model_output(target_name, "1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind")
+
+  2_process/out/wbeep_storage_data_sf.rds:
+    command: join_spatial_and_data(
+      target_name = target_name, 
+      spatial_sf_fn = '2_process/out/hru_conus_sf.rds',
+      model_data_fn = '2_process/out/wbeep_storage_data_combined.rds')
