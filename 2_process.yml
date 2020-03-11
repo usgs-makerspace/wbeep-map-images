@@ -5,24 +5,28 @@ include:
 packages:
   - sf
   - geojsonio
+  - readr
+  - dplyr
+  - purrr
 
 sources:
   - 2_process/src/process_hru_sf.R
+  - 2_process/src/process_model_output.R
 
 targets:
   all: 
     depends: 
       - 2_process/out/hru_sf.rds
       - 2_process/out/hru_conus_sf.rds
+      - 2_process/out/wbeep_storage_data_combined.rds
 
-  proj_topo_start: 
-    command: c(I('+proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=1000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs'))
+  ##### Process spatial data ##### 
   
   2_process/out/hru_sf.rds:
     command: topo_to_sf(
       target_name = target_name,
       topo_fn = '1_fetch/out/hru.topojson', 
-      proj_start = proj_topo_start,
+      proj_start = I(4326),
       proj_target = proj)
 
   # Crop hru spatial data to just CONUS
@@ -31,3 +35,8 @@ targets:
       target_name = target_name,
       hru_sf_fn = '2_process/out/hru_sf.rds', 
       conus_sf_fn = '1_fetch/out/conus_sf.rds')
+
+  ##### Process WBEEP storage modeled data for mapping #####
+
+  2_process/out/wbeep_storage_data_combined.rds:
+    command: process_and_combine_model_output(target_name, "1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind")
