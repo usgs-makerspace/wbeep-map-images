@@ -1,0 +1,51 @@
+
+include:
+  - 2_process.yml
+
+packages:
+  - sf
+  - dplyr
+
+sources:
+  - 6_visualize/src/join_map_colors.R
+  - 6_visualize/src/visualize_date_task_plan.R
+
+targets:
+  all: 
+    depends: 
+      - 6_visualize_wbeep_storage_date_tasks.yml
+      - 6_visualize/log/wbeep_storage_maps.ind
+
+  ##### Visualize WBEEP storage modeled data #####
+
+  wbeep_storage_categories: 
+    command: c(I("very low"), I("low"), I("average"), I("high"), I("very high"))
+  wbeep_storage_colors:
+    command: c(I("#967a4a"), I("#BDAD9D"), I("#C8D3BA"), I("#337598"), I("#1C2040"))
+  
+  # Merge colors into data and prep for map
+  6_visualize/tmp/wbeep_storage_data_map_colors.rds:
+    command: join_map_colors(
+      target_name = target_name,
+      data_sf_fn = '2_process/out/wbeep_storage_data_sf.rds',
+      map_categories = wbeep_storage_categories,
+      map_colors = wbeep_storage_colors)
+  
+  # Need one for each day, so need to use task tables.
+  
+  visualize_wbeep_storage_date_tasks:
+    command: create_visualize_date_tasks(
+      date_range = date_range,
+      log_folder = I('6_visualize/log'))
+  
+  6_visualize_wbeep_storage_date_tasks.yml:
+    command: create_visualize_date_task_makefile(
+      makefile = target_name,
+      task_plan = visualize_wbeep_storage_date_tasks,
+      remake_file = I('6_visualize.yml'))
+
+  # Now build a map for each day (takes ~ 2.5 minutes per image)
+  6_visualize/log/wbeep_storage_maps.ind:
+    command: loop_tasks(
+      task_plan = visualize_wbeep_storage_date_tasks,
+      task_makefile = '6_visualize_wbeep_storage_date_tasks.yml')
