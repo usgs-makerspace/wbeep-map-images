@@ -1,0 +1,39 @@
+
+packages:
+  - aws.s3
+  - aws.signature
+  - sf
+  - maps
+  - lwgeom
+
+sources:
+  - 1_fetch/src/create_conus_sf.R
+  - 1_fetch/src/download_from_s3.R
+
+targets:
+  all: 
+    depends: 
+      - 1_fetch/out/conus_sf.rds
+      - 1_fetch/out/hru.topojson
+      
+  # S3 bucket & folder locations
+  s3_bucket:
+    command: c(I("prod-owi-resources"))
+  s3_wbeep_loc:
+    command: c(I("resources/Application/wbeep"))
+
+  ##### Fetch spatial data ##### 
+  
+  proj: 
+    command: c(I("+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs"))
+  
+  # Need US shape in order to crop to US boundaries and remove HRUs that extend beyond US borders
+  1_fetch/out/conus_sf.rds:
+    command: create_conus_sf(target_name, proj)
+  
+  1_fetch/out/hru.topojson:
+    command: download_s3_file(
+      target_name, 
+      s3_bucket = s3_bucket, 
+      s3_file_loc = s3_wbeep_loc,
+      s3_filename = I('development/hru_shape/simple/topojson_valid_quant.topojson'))
