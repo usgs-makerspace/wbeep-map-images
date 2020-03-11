@@ -5,10 +5,12 @@ packages:
   - sf
   - maps
   - lwgeom
+  - dplyr
 
 sources:
   - 1_fetch/src/create_conus_sf.R
   - 1_fetch/src/download_from_s3.R
+  - 1_fetch/src/date_task_plan.R
 
 targets:
   all: 
@@ -16,11 +18,17 @@ targets:
       - 1_fetch/out/conus_sf.rds
       - 1_fetch/out/hru.topojson
       
+  # Dates to visualize
+  date_range:
+    command: list(start = I("2019-12-18"), end = I("2019-12-19"))
+  
   # S3 bucket & folder locations
   s3_bucket:
     command: c(I("prod-owi-resources"))
   s3_wbeep_loc:
     command: c(I("resources/Application/wbeep"))
+  s3_wbeep_storage_model_loc:
+    command: file.path(s3_wbeep_loc, I("model_output_csv"))  
 
   ##### Fetch spatial data ##### 
   
@@ -37,3 +45,19 @@ targets:
       s3_bucket = s3_bucket, 
       s3_file_loc = s3_wbeep_loc,
       s3_filename = I('development/hru_shape/simple/topojson_valid_quant.topojson'))
+
+  ##### Fetch WBEEP storage modeled data #####
+  
+  # Need one for each day, so need to use task tables.
+  
+  fetch_wbeep_storage_date_tasks:
+    command: create_date_tasks(
+      date_range = date_range,
+      log_folder = I('1_fetch/log'))
+  
+  1_fetch_wbeep_storage_date_tasks.yml:
+    command: create_date_task_makefile(
+      makefile = target_name,
+      task_plan = fetch_wbeep_storage_date_tasks,
+      remake_file = I('1_fetch.yml'))
+  
