@@ -10,7 +10,7 @@ packages:
 sources:
   - 1_fetch/src/create_conus_sf.R
   - 1_fetch/src/download_from_s3.R
-  - 1_fetch/src/date_task_plan.R
+  - 1_fetch/src/fetch_date_task_plan.R
 
 targets:
   all: 
@@ -51,12 +51,12 @@ targets:
   # Need one for each day, so need to use task tables.
   
   fetch_wbeep_storage_date_tasks:
-    command: create_date_tasks(
+    command: create_fetch_date_tasks(
       date_range = date_range,
       log_folder = I('1_fetch/log'))
   
   1_fetch_wbeep_storage_date_tasks.yml:
-    command: create_date_task_makefile(
+    command: create_fetch_date_task_makefile(
       makefile = target_name,
       task_plan = fetch_wbeep_storage_date_tasks,
       remake_file = I('1_fetch.yml'))

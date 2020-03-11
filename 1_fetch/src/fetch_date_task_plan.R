@@ -1,4 +1,4 @@
-create_date_task_makefile <- function(makefile, task_plan, remake_file) {
+create_fetch_date_task_makefile <- function(makefile, task_plan, remake_file) {
   scipiper::create_task_makefile(
     makefile=makefile, task_plan=task_plan,
     include=remake_file,
@@ -9,7 +9,7 @@ create_date_task_makefile <- function(makefile, task_plan, remake_file) {
   )
 }
 
-create_date_tasks <- function(date_range, log_folder){
+create_fetch_date_tasks <- function(date_range, log_folder){
   
   # prepare a data.frame with one row per task
   timesteps <- seq(as.Date(date_range$start), as.Date(date_range$end), by = 1)
