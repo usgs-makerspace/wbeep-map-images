@@ -21,7 +21,7 @@ targets:
       
   # Dates to visualize
   date_range:
-    command: list(start = I("2019-12-18"), end = I("2019-12-19"))
+    command: list(start = I("2019-12-18"), end = I("2020-03-10")) # 84 days
   
   # S3 bucket & folder locations
   s3_bucket:
