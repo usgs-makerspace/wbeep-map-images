@@ -48,4 +48,5 @@ targets:
   6_visualize/log/wbeep_storage_maps.ind:
     command: loop_tasks(
       task_plan = visualize_wbeep_storage_date_tasks,
-      task_makefile = '6_visualize_wbeep_storage_date_tasks.yml')
+      task_makefile = '6_visualize_wbeep_storage_date_tasks.yml',
+      num_tries = 1)

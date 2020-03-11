@@ -21,7 +21,7 @@ targets:
       
   # Dates to visualize
   date_range:
-    command: list(start = I("2019-12-18"), end = I("2020-03-10")) # 84 days
+    command: list(start = I("2019-12-18"), end = I("2020-03-10")) # 84 days (Jan 1-2 & Feb 6 threw an error for some reason)
   
   # S3 bucket & folder locations
   s3_bucket:
@@ -66,4 +66,5 @@ targets:
   1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind:
     command: loop_tasks(
       task_plan = fetch_wbeep_storage_date_tasks,
-      task_makefile = '1_fetch_wbeep_storage_date_tasks.yml')
+      task_makefile = '1_fetch_wbeep_storage_date_tasks.yml',
+      num_tries = 3)
