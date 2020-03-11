@@ -20,8 +20,9 @@ targets:
       - 1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind
       
   # Dates to visualize
+  # Dec 18 to Mar 10: 84 days (Jan 1-2 & Feb 6 threw an error for some reason so skipping)
   date_range:
-    command: list(start = I("2019-12-18"), end = I("2020-03-10")) # 84 days (Jan 1-2 & Feb 6 threw an error for some reason)
+    command: list(start = I("2019-12-18"), end = I("2020-03-10")) 
   
   # S3 bucket & folder locations
   s3_bucket:

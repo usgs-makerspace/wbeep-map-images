@@ -14,7 +14,9 @@ create_fetch_date_tasks <- function(date_range, log_folder){
   # prepare a data.frame with one row per task
   timesteps <- seq(as.Date(date_range$start), as.Date(date_range$end), by = 1)
   tasks <- data_frame(timestep=timesteps) %>%
-    mutate(task_name = strftime(timestep, format = '%Y%m%d', tz = 'UTC'))
+    mutate(task_name = strftime(timestep, format = '%Y%m%d', tz = 'UTC')) %>% 
+    # Skip ones that are failing for now
+    filter(!task_name %in% c('20200101', '20200102', '20200206'))
   
   data_downloaded <- scipiper::create_task_step(
     step_name = 'data_downloaded',
