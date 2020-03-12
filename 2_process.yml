@@ -11,15 +11,15 @@ packages:
 
 sources:
   - 2_process/src/process_hru_sf.R
-  - 2_process/src/process_model_output.R
+  - 2_process/src/process_date_task_plan.R
 
 targets:
   all: 
     depends: 
       - 2_process/out/hru_sf.rds
       - 2_process/out/hru_conus_sf.rds
-      - 2_process/out/wbeep_storage_data_combined.rds
-      - 2_process/out/wbeep_storage_data_sf.rds
+      - 2_process_wbeep_storage_date_tasks.yml
+      - 2_process/log/2_process_wbeep_storage_date_tasks.ind
 
   ##### Process spatial data ##### 
   
@@ -39,11 +39,22 @@ targets:
 
   ##### Process WBEEP storage modeled data for mapping #####
 
-  2_process/out/wbeep_storage_data_combined.rds:
-    command: process_and_combine_model_output(target_name, "1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind")
+  # Need one for each day, so need to use task tables.
+  
+  process_wbeep_storage_date_tasks:
+    command: create_process_date_tasks(
+      date_range = date_range,
+      log_folder = I('2_process/log'))
+  
+  2_process_wbeep_storage_date_tasks.yml:
+    command: create_process_date_task_makefile(
+      makefile = target_name,
+      task_plan = process_wbeep_storage_date_tasks,
+      remake_file = I('2_process.yml'))
 
-  2_process/out/wbeep_storage_data_sf.rds:
-    command: join_spatial_and_data(
-      target_name = target_name, 
-      spatial_sf_fn = '2_process/out/hru_conus_sf.rds',
-      model_data_fn = '2_process/out/wbeep_storage_data_combined.rds')
+  # Execute process for each task (took ~20 min with 84 days)
+  2_process/log/2_process_wbeep_storage_date_tasks.ind:
+    command: loop_tasks(
+      task_plan = process_wbeep_storage_date_tasks,
+      task_makefile = '2_process_wbeep_storage_date_tasks.yml',
+      num_tries = 1)
