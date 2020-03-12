@@ -7,7 +7,6 @@ packages:
   - dplyr
 
 sources:
-  - 6_visualize/src/join_map_colors.R
   - 6_visualize/src/visualize_date_task_plan.R
 
 targets:
@@ -22,14 +21,6 @@ targets:
     command: c(I("very low"), I("low"), I("average"), I("high"), I("very high"))
   wbeep_storage_colors:
     command: c(I("#967a4a"), I("#BDAD9D"), I("#C8D3BA"), I("#337598"), I("#1C2040"))
-  
-  # Merge colors into data and prep for map
-  6_visualize/tmp/wbeep_storage_data_map_colors.rds:
-    command: join_map_colors(
-      target_name = target_name,
-      data_sf_fn = '2_process/out/wbeep_storage_data_sf.rds',
-      map_categories = wbeep_storage_categories,
-      map_colors = wbeep_storage_colors)
   
   # Need one for each day, so need to use task tables.
   

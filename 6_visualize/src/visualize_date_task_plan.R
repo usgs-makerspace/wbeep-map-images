@@ -28,8 +28,9 @@ create_visualize_date_tasks <- function(date_range, log_folder){
       cur_task <- dplyr::filter(rename(tasks, tn=task_name), tn==task_name)
       psprintf("make_map(", 
                "target_name = target_name,", 
-               "map_data_sf_fn = '6_visualize/tmp/wbeep_storage_data_map_colors.rds',", 
-               "date_str = I('date_%s'))" = task_name
+               "data_sf_fn = '2_process/out/wbeep_storage_data_sf_%s.rds'," = task_name, 
+               "map_categories = wbeep_storage_categories,",
+               "map_colors = wbeep_storage_colors)"
       )
     } 
   )
