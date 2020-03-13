@@ -1,0 +1,75 @@
+
+packages:
+  - aws.s3
+  - aws.signature
+  - sf
+  - maps
+  - lwgeom
+  - dplyr
+
+sources:
+  - 1_fetch/src/create_conus_sf.R
+  - 1_fetch/src/fetch_date_task_plan.R
+
+targets:
+  all: 
+    depends: 
+      - 1_fetch/out/conus_sf.rds
+      - 1_fetch/out/hru.topojson
+      - 1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind
+      
+  # Dates to visualize
+  # Dec 18 to Mar 10: 84 days (Jan 1-2 & Feb 6 threw an error for some reason so skipping)
+  date_range:
+    command: list(start = I("2019-12-18"), end = I("2020-03-10")) 
+  
+  # S3 bucket & folder locations
+  cred_file:
+    command: default_credentials_file()
+  use_creds:
+    command: use_credentials(profile=I('default'), file=cred_file)
+  s3_bucket:
+    command: c(I("prod-owi-resources"))
+  s3_wbeep_loc:
+    command: c(I("resources/Application/wbeep"))
+  s3_wbeep_storage_model_loc:
+    command: file.path(s3_wbeep_loc, I("model_output_csv"))  
+
+  ##### Fetch spatial data ##### 
+  
+  proj: 
+    command: c(I("+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs"))
+  
+  # Need US shape in order to crop to US boundaries and remove HRUs that extend beyond US borders
+  1_fetch/out/conus_sf.rds:
+    command: create_conus_sf(target_name, proj)
+  
+  s3_hru_filename:
+    command: file.path(s3_wbeep_loc, I('development/hru_shape/simple/topojson_valid_quant.topojson'))
+  1_fetch/out/hru.topojson:
+    command: save_object(
+      object = s3_hru_filename, 
+      bucket = s3_bucket,
+      file = target_name)
+
+  ##### Fetch WBEEP storage modeled data #####
+  
+  # Need one for each day, so need to use task tables.
+  
+  fetch_wbeep_storage_date_tasks:
+    command: create_fetch_date_tasks(
+      date_range = date_range,
+      log_folder = I('1_fetch/log'))
+  
+  1_fetch_wbeep_storage_date_tasks.yml:
+    command: create_fetch_date_task_makefile(
+      makefile = target_name,
+      task_plan = fetch_wbeep_storage_date_tasks,
+      remake_file = I('1_fetch.yml'))
+
+  # Execute fetch for each task
+  1_fetch/log/1_fetch_wbeep_storage_date_tasks.ind:
+    command: loop_tasks(
+      task_plan = fetch_wbeep_storage_date_tasks,
+      task_makefile = '1_fetch_wbeep_storage_date_tasks.yml',
+      num_tries = 3)
