@@ -9,7 +9,6 @@ packages:
 
 sources:
   - 1_fetch/src/create_conus_sf.R
-  - 1_fetch/src/download_from_s3.R
   - 1_fetch/src/fetch_date_task_plan.R
 
 targets:
@@ -25,6 +24,10 @@ targets:
     command: list(start = I("2019-12-18"), end = I("2020-03-10")) 
   
   # S3 bucket & folder locations
+  cred_file:
+    command: default_credentials_file()
+  use_creds:
+    command: use_credentials(profile=I('default'), file=cred_file)
   s3_bucket:
     command: c(I("prod-owi-resources"))
   s3_wbeep_loc:
@@ -41,12 +44,13 @@ targets:
   1_fetch/out/conus_sf.rds:
     command: create_conus_sf(target_name, proj)
   
+  s3_hru_filename:
+    command: file.path(s3_wbeep_loc, I('development/hru_shape/simple/topojson_valid_quant.topojson'))
   1_fetch/out/hru.topojson:
-    command: download_s3_file(
-      target_name, 
-      s3_bucket = s3_bucket, 
-      s3_file_loc = s3_wbeep_loc,
-      s3_filename = I('development/hru_shape/simple/topojson_valid_quant.topojson'))
+    command: save_object(
+      object = s3_hru_filename, 
+      bucket = s3_bucket,
+      file = target_name)
 
   ##### Fetch WBEEP storage modeled data #####
   
