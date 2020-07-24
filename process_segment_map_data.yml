@@ -1,0 +1,38 @@
+packages:
+  - sf
+  - dplyr
+  - purrr
+  - lubridate
+  - tidyr
+
+sources:
+  - 2_process/src/stream_segment_maps.R
+  - 6_visualize/src/make_segment_maps.R
+  - 2_process/src/process_model_output.R
+
+targets:
+  #this file is on the FTP, but FTP is unusable at the moment...
+  #
+  #sharepoint link here: 
+  2_process/out/segment_season_quantiles.rds:
+    command: calculate_season_quantiles(outfile = target_name,
+                                      daily_segment_aves_file = I("seg_tave_water.rds"))
+
+  days_to_map: 
+    command: get_days_data(daily_segment_aves_file = I("seg_tave_water.rds"),
+                         dates = I(c("2015-07-20", "2015-10-25",
+                                     "2015-01-30", "2015-04-28")))
+  classified_segment_quantiles:
+    command: classify_segments(segment_quantiles_file = '2_process/out/segment_season_quantiles.rds',
+                               days_to_map = days_to_map)
+                               
+  categories: 
+    command: c(I("very low"), I("low"), I("average"), I("high"), I("very high"))
+  colors:
+    command: c(I("dodgerblue4"), I("deepskyblue1"), I("lemonchiffon"), I("rosybrown1"), I("red2"))
+  
+  maps_info:
+    command: make_segment_maps(classified_segment_data = classified_segment_quantiles,
+                               categories = categories, colors = colors,
+                               geofabric_dir = I('1_fetch/in/GFv1.1.gdb'),
+                               out_dir = I("6_visualize/out"))

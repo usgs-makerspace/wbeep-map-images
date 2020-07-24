@@ -2,9 +2,8 @@ calculate_season_quantiles <- function(outfile, daily_segment_aves_file) {
   ave_temps <- readRDS(daily_segment_aves_file) 
   ave_temp_matrix <- as.matrix(ave_temps[,-1])
   rownames(ave_temp_matrix) <- ave_temps$Date
-  
   date_df <- tibble(date = ave_temps$Date) %>% 
-    mutate(season = get_season(Date))
+    mutate(season = get_season(date))
   rm(ave_temps)
   gc()
   season_quantiles_all <- tibble()
@@ -44,7 +43,7 @@ get_season <- function(input_date){
   ## input Seasons upper limits in the form MMDD in the "break =" option:
   cuts <- base::cut(numeric.date, breaks = c(0,319,0620,0921,1220,1231)) 
   # rename the resulting groups (could've been done within cut(...levels=) if "Winter" wasn't double
-  levels(cuts) <- c("Winter","Spring","Summer","Fall","Winter")
+  levels(cuts) <- c("winter","spring","summer","fall","winter")
   return(cuts)
 }
 
