@@ -29,7 +29,7 @@ targets:
   categories: 
     command: c(I("very low"), I("low"), I("average"), I("high"), I("very high"))
   colors:
-    command: c(I("dodgerblue4"), I("deepskyblue1"), I("lemonchiffon"), I("rosybrown1"), I("red2"))
+    command: c(I("dodgerblue4"), I("deepskyblue1"), I("seashell"), I("rosybrown1"), I("red2"))
   
   maps_info:
     command: make_segment_maps(classified_segment_data = classified_segment_quantiles,
